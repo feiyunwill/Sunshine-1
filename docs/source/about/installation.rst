@@ -115,6 +115,12 @@ Portfile option:
          cd /tmp && sudo port install
 
    #. The first time you start Sunshine, you will be asked to grant access to screen recording and your microphone.
+   #. Try to run the following code if you get this error: `Dynamic session lookup supported but failed: launchd did
+      not provide a socket path, verify that org.freedesktop.dbus-session.plist is loaded!`
+
+         .. code-block:: bash
+
+            launchctl load -w /Library/LaunchAgents/org.freedesktop.dbus-session.plist
 
 Standalone option:
    #. Download and extract ``sunshine-macos.zip``

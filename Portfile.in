@@ -5,7 +5,7 @@ PortGroup           cmake 1.1
 PortGroup           github 1.0
 PortGroup           boost 1.0
 
-github.setup        sunshinestream sunshine master
+github.setup        @GITHUB_OWNER@ @GITHUB_REPO@ @GITHUB_BRANCH@
 version             @PROJECT_VERSION@
 revision            1
 
@@ -31,19 +31,37 @@ depends_lib         port:avahi \
 boost.version       1.76
 
 configure.args      -DBOOST_ROOT=[boost::install_area] \
-                    -DSUNSHINE_ASSETS_DIR=${prefix}/etc/sunshine/assets
+                    -DSUNSHINE_ASSETS_DIR=${prefix}/etc/sunshine/assets \
                     -DSUNSHINE_CONFIG_DIR=${prefix}/etc/sunshine/config
 
 cmake.out_of_source yes
 
-destroot {
-    xinstall -d -m 755 ${destroot}${prefix}/usr/local/${name}/.assets
-    xinstall {*}[glob ${worksrcpath}/src_assets/common/assets/*] ${destroot}${prefix}/usr/local/${name}/.assets
-    xinstall {*}[glob ${worksrcpath}/src_assets/macos/assets/*] ${destroot}${prefix}/usr/local/${name}/.assets
+startupitem.create       yes
+startupitem.executable  "${prefix}/bin/{$name}"
+startupitem.location     LaunchDaemons
+startupitem.name         ${name}
+startupitem.netchange    yes
 
-    xinstall -d -m 755 ${destroot}${prefix}/usr/local/${name}/config
-    xinstall {*}[glob ${worksrcpath}/src_assets/common/config/*] ${destroot}${prefix}/usr/local/${name}/config
-    xinstall {*}[glob ${worksrcpath}/src_assets/macos/config/*] ${destroot}${prefix}/usr/local/${name}/config
+destroot {
+    xinstall -d -m 755 ${destroot}${prefix}/etc/${name}/assets
+    xinstall {*}[glob ${worksrcpath}/src_assets/common/assets/*.*] ${destroot}${prefix}/etc/${name}/assets
+    xinstall {*}[glob ${worksrcpath}/src_assets/macos/assets/*.*] ${destroot}${prefix}/etc/${name}/assets
+
+    xinstall -d -m 755 ${destroot}${prefix}/etc/${name}/assets/web/fonts/fontawesome-free-web/css
+    xinstall -d -m 755 ${destroot}${prefix}/etc/${name}/assets/web/fonts/fontawesome-free-web/webfonts
+    xinstall {*}[glob ${worksrcpath}/src_assets/common/assets/web/*.*] ${destroot}${prefix}/etc/${name}/assets/web
+    xinstall {*}[glob ${worksrcpath}/src_assets/common/assets/web/fonts/fontawesome-free-web/*.*] ${destroot}${prefix}/etc/${name}/assets/web/fonts/fontawesome-free-web
+    xinstall {*}[glob ${worksrcpath}/src_assets/common/assets/web/fonts/fontawesome-free-web/css/*.*] ${destroot}${prefix}/etc/${name}/assets/web/fonts/fontawesome-free-web/css
+    xinstall {*}[glob ${worksrcpath}/src_assets/common/assets/web/fonts/fontawesome-free-web/webfonts/*.*] ${destroot}${prefix}/etc/${name}/assets/web/fonts/fontawesome-free-web/webfonts
+
+    xinstall -d -m 755 ${destroot}${prefix}/etc/${name}/assets/web/images
+    xinstall -d -m 755 ${destroot}${prefix}/etc/${name}/assets/web/third_party
+    xinstall {*}[glob ${worksrcpath}/src_assets/common/assets/web/images/*.*] ${destroot}${prefix}/etc/${name}/assets/web/images
+    xinstall {*}[glob ${worksrcpath}/src_assets/common/assets/web/third_party/*.*] ${destroot}${prefix}/etc/${name}/assets/web/third_party
+
+    xinstall -d -m 755 ${destroot}${prefix}/etc/${name}/config
+    xinstall {*}[glob ${worksrcpath}/src_assets/common/config/*.*] ${destroot}${prefix}/etc/${name}/config
+    xinstall {*}[glob ${worksrcpath}/src_assets/macos/config/*.*] ${destroot}${prefix}/etc/${name}/config
 
     xinstall ${workpath}/build/${name} ${destroot}${prefix}/bin
 }

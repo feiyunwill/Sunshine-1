@@ -267,9 +267,26 @@ jobs:
 
       - name: Build MacOS
         run: |
+          # variables for Portfile
+          owner=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]' )
+          repo=$(echo ${GITHUB_REPOSITORY#*/} | tr '[:upper:]' '[:lower:]' )
+          branch=${GITHUB_HEAD_REF}
+          
+          # check the branch variable
+          if [ -z "$branch" ]
+          then
+              echo "This is a PUSH event"
+              branch=${GITHUB_BASE_REF}
+          else
+              echo "This is a PR event"
+          fi
+          echo "Owner: ${owner}"
+          echo "Repo: ${repo}"
+          echo "Branch: ${branch}"
+          
           mkdir build
           cd build
-          cmake -DCMAKE_BUILD_TYPE=Release -DSUNSHINE_ASSETS_DIR=/usr/local/sunshine/assets -DSUNSHINE_CONFIG_DIR=/usr/local/sunshine/config ..
+          cmake -DCMAKE_BUILD_TYPE=Release -DSUNSHINE_ASSETS_DIR=/usr/local/sunshine/assets -DSUNSHINE_CONFIG_DIR=/usr/local/sunshine/config -DGITHUB_OWNER=${owner} -DGITHUB_REPO=${repo} -DGITHUB_BRANCH=${branch} ..
           make -j ${nproc}
 
       - name: Package MacOS
@@ -279,12 +296,16 @@ jobs:
 
           # package
           cpack -G DragNDrop
+          mv ./cpack_artifacts/Sunshine.dmg ../artifacts/sunshine-macos-experimental-dragndrop.dmg
+          
+          cpack -G Bundle
+          mv ./cpack_artifacts/Sunshine.dmg ../artifacts/sunshine-macos-experimental-bundle.dmg
+          
           cpack -G ZIP
+          mv ./cpack_artifacts/Sunshine.zip ../artifacts/sunshine-macos-experimental-archive.zip
 
           # move
           mv Portfile ../artifacts/Portfile
-          mv ./cpack_artifacts/Sunshine.dmg ../artifacts/sunshine-macos.dmg
-          mv ./cpack_artifacts/Sunshine.zip ../artifacts/sunshine-macos.zip
 
       - name: Upload Artifacts
         if: ${{ github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
